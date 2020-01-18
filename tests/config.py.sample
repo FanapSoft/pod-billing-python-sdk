@@ -1,0 +1,13 @@
+# coding=utf-8
+
+API_TOKEN = "YOUR_API_TOKEN"
+SERVER_MODE = "sandbox"  # sandbox or production
+SC_API_KEY = "SC_API_KEY"
+SC_VOUCHER_HASH = []  # لیست کد های تخفیف
+GUILD_CODE = "API_GUILD"  # کد صنفی که قصد دارید مبلغ فاکتورهای ایجاد شده به آن واریز شود
+
+USER_ID_YOUR_BUSINESS =   # شناسه کاربری کسب و کار خودتان
+USER_ID =    # شناسه کاربری مشتری
+WALLET =   # کد کیف پول
+OTHER_BUSINESS_GUILD_CODE =   # کد صنفی در کسب و کار دوم
+OTHER_BUSINESS_API_TOKEN =   # API TOKEN کسب و کار دوم
