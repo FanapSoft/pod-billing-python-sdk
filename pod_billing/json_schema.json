@@ -4,7 +4,7 @@
     "properties": {
       "redirectURL": {
         "type": "string",
-        "format": "uri",
+        "pattern": "(https?|ftp)://[^\\s/$.?#].[^\\s]*",
         "title": "آدرس فراخوانی صادر کننده فاکتور"
       },
       "userId": {
@@ -179,7 +179,7 @@
     "properties": {
       "redirectUri": {
         "type": "string",
-        "format": "uri",
+        "pattern": "(https?|ftp)://[^\\s/$.?#].[^\\s]*",
         "title": "آدرس فراخوانی صادر کننده فاکتور"
       },
       "token": {
@@ -253,6 +253,7 @@
       },
       "callUrl": {
         "type": "string",
+        "pattern": "(https?|ftp)://[^\\s/$.?#].[^\\s]*",
         "title": "در صورت پرداخت موفق این آدرس صدا خواهد شد"
       },
       "billNumber": {
@@ -494,7 +495,14 @@
         "title": "توکن برای فراخوانی سرویس کال"
       }
     },
-    "required": ["invoiceId", "terminalNumber", "merchantCode", "referenceNumber", "trackingNumber", "transactionDate"]
+    "required": [
+      "invoiceId",
+      "terminalNumber",
+      "merchantCode",
+      "referenceNumber",
+      "trackingNumber",
+      "transactionDate"
+    ]
   },
   "getPayInvoiceByWalletLink": {
     "type": "object",
@@ -505,12 +513,13 @@
       },
       "redirectUri": {
         "type": "string",
-        "format": "uri",
+        "pattern": "(https?|ftp)://[^\\s/$.?#].[^\\s]*",
         "title": "آدرس بازگشت",
         "description": "آدرسی است که بعد از پرداخت کاربر به آن هدایت می گردد"
       },
       "callUri": {
         "type": "string",
+        "pattern": "(https?|ftp)://[^\\s/$.?#].[^\\s]*",
         "title": "بعد از پرداخت این آدرس صدا زده می شود"
       }
     },
@@ -529,12 +538,13 @@
       },
       "redirectUri": {
         "type": "string",
-        "format": "uri",
+        "pattern": "(https?|ftp)://[^\\s/$.?#].[^\\s]*",
         "title": "آدرس بازگشت",
         "description": "آدرسی است که بعد از پرداخت کاربر به آن هدایت می گردد"
       },
       "callUri": {
         "type": "string",
+        "pattern": "(https?|ftp)://[^\\s/$.?#].[^\\s]*",
         "title": "بعد از پرداخت این آدرس صدا زده می شود"
       },
       "gateway": {
@@ -560,11 +570,12 @@
       },
       "callbackUri": {
         "type": "string",
+        "pattern": "(https?|ftp)://[^\\s/$.?#].[^\\s]*",
         "title": "بعد از پرداخت این آدرس صدا زده می شود"
       },
       "redirectUri": {
         "type": "string",
-        "format": "uri",
+        "pattern": "(https?|ftp)://[^\\s/$.?#].[^\\s]*",
         "title": "آدرس بازگشت",
         "description": "آدرسی است که بعد از پرداخت کاربر به آن هدایت می گردد"
       },
@@ -715,6 +726,7 @@
       },
       "callbackUrl": {
         "type": "string",
+        "pattern": "(https?|ftp)://[^\\s/$.?#].[^\\s]*",
         "title": "آدرس فراخوانی پس از اتمام تولید گزارش"
       },
       "scVoucherHash": {
@@ -941,12 +953,13 @@
       },
       "redirectUri": {
         "type": "string",
-        "format": "uri",
+        "pattern": "(https?|ftp)://[^\\s/$.?#].[^\\s]*",
         "title": "آدرس بازگشت",
         "description": "آدرسی است که بعد از پرداخت کاربر به آن هدایت می گردد"
       },
       "callbackUri": {
         "type": "string",
+        "pattern": "(https?|ftp)://[^\\s/$.?#].[^\\s]*",
         "title": "بعد از پرداخت این آدرس صدا زده می شود"
       },
       "gateway": {
@@ -1077,7 +1090,7 @@
         "title": "کد وضعیت"
       },
       "serviceUrl": {
-        "format": "uri",
+        "pattern": "(https?|ftp)://[^\\s/$.?#].[^\\s]*",
         "type": "string",
         "title": "آدرس سرویس"
       },
