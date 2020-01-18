@@ -1,9 +1,10 @@
 # coding=utf-8
 import json
 from os import path
-from pod_base import PodBase, calc_offset, PodException, ConfigException
+from pod_base import PodBase, calc_offset, PodException, ConfigException, InvalidDataException
 from pod_common import PodCommon
 from pod_export import PodExport
+
 try:
     from urllib.parse import urlencode
 except ImportError:
@@ -11,7 +12,6 @@ except ImportError:
 
 
 class PodBilling(PodBase):
-
     __slots__ = ("export", "payment", "__common")
 
     def __init__(self, api_token, token_issuer="1", server_type="sandbox", config_path=None,
@@ -156,12 +156,10 @@ class PodBilling(PodBase):
 
         return invoice_item_id, quantity, item_description, price
 
-    def get_invoice_list(self, page=1, size=20, bill_number="", from_date="", to_date="", **kwargs):
+    def get_invoice_list(self, bill_number="", from_date="", to_date="", **kwargs):
         """
         لیست فاکتورها
 
-        :param int page: شماره صفحه
-        :param int size: تعداد رکورد در هر صفحه
         :param str bill_number: شماره قبض یکتا
         :param str from_date: از تاریخ صدور به صورت شمسی
         فرمت تاریخ شروع باید به صورت yyyy/mm/dd hh:ii:ss باشد به طور مثال
@@ -172,9 +170,14 @@ class PodBilling(PodBase):
         """
 
         params = kwargs
+        if "firstId" not in params and "lastId" not in params and "page" not in params:
+            params.setdefault("page", 1)
 
-        params["offset"] = calc_offset(page, size)
-        params["size"] = size
+        params.setdefault("size", 50)
+        if "page" in params:
+            params["offset"] = calc_offset(params["page"], params["size"])
+            del params["page"]
+
         if bill_number:
             params["billNumber"] = bill_number
         if from_date:
@@ -211,6 +214,13 @@ class PodBilling(PodBase):
         :param int size: تعداد رکورد در هر صفحه
         :return: list
         """
+        if type(meta_query) != dict:
+            info = {
+                "message": "meta_data is not dict",
+                "error_code": 887
+            }
+            raise InvalidDataException(**info)
+
         params = kwargs
         params["offset"] = calc_offset(page, size)
         params["size"] = size
@@ -457,12 +467,13 @@ class PodBilling(PodBase):
             "gateway": gateway
         }
 
-        if redirect_url is None:
+        if redirect_url is not None:
             params["redirectUri"] = redirect_url
 
-        if call_url is None:
+        if call_url is not None:
             params["callUri"] = call_url
 
+        self._validate(params, "getPayInvoiceByUniqueNumberLink")
         return "{}/v1/pbc/payInvoiceByUniqueNumber/?{}".format(self.__get_private_call_address(), urlencode(params))
 
     def send_invoice_payment_sms(self, invoice_id, **kwargs):
@@ -516,7 +527,7 @@ class PodBilling(PodBase):
             sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/payInvoiceByInvoice"), params=params,
             headers=self._get_headers(), **kwargs)
 
-    def pay_invoice_in_future(self, invoice_id, date, guild_code = None, wallet = None, **kwargs):
+    def pay_invoice_in_future(self, invoice_id, date, guild_code=None, wallet=None, **kwargs):
         """
         پرداخت فاکتور در آینده
 
@@ -575,4 +586,3 @@ class PodBilling(PodBase):
         return self._request.call(
             sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/payInvoiceByPos"), params=params,
             headers=self._get_headers(), **kwargs)
-
