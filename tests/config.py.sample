@@ -11,3 +11,7 @@ USER_ID =    # شناسه کاربری مشتری
 WALLET =   # کد کیف پول
 OTHER_BUSINESS_GUILD_CODE =   # کد صنفی در کسب و کار دوم
 OTHER_BUSINESS_API_TOKEN =   # API TOKEN کسب و کار دوم
+
+# Voucher Test variables
+PRODUCT_IDs = []         # لیستی از شناسه محصولات
+DEALER_BUSINESS_IDs = []    # لیستی از شناسه کسب و کارهای همکار
