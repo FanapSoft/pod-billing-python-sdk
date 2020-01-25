@@ -5,3 +5,7 @@ SERVER_MODE = "sandbox"  # sandbox or production
 SC_API_KEY = "SC_API_KEY"
 SC_VOUCHER_HASH = []  # لیست کد های تخفیف
 GUILD_CODE = "API_GUILD"  # کد صنفی که قصد دارید مبلغ فاکتورهای ایجاد شده به آن واریز شود
+
+USER_ID =   # شناسه کاربری مشتری
+PRODUCT_IDs = []         # لیستی از شناسه محصولات
+DEALER_BUSINESS_IDs = []    # لیستی از شناسه کسب و کارهای همکار - حداقل 2 مورد را وارد نمایید

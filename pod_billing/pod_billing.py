@@ -586,3 +586,95 @@ class PodBilling(PodBase):
         return self._request.call(
             sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/payInvoiceByPos"), params=params,
             headers=self._get_headers(), **kwargs)
+
+    def issue_multi_invoice(self, main_invoice, customer_invoice, sub_invoices, **kwargs):
+        """
+        صدور فاکتور تسهیمی
+
+        :param dict main_invoice: اطلاعات فاکتور اصلی
+        :param list customer_invoice: اطلاعات فاکتور مشتری
+        :param list sub_invoices: لیستی از فاکتورهای ذینفعان
+        :return: dict
+        """
+
+        params = {"data": kwargs}
+        params["data"]["mainInvoice"] = main_invoice
+        params["data"]["subInvoices"] = sub_invoices
+        params["data"]["customerInvoiceItemVOs"] = customer_invoice
+
+        self._validate(params, "issueMultiInvoice")
+
+        params["data"] = json.dumps(self.__convert_dict_to_str(params["data"]))
+
+        return self._request.call(
+            sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/issueMultiInvoice", method_type="post"),
+            params=params, headers=self._get_headers(), **kwargs)
+
+    @staticmethod
+    def __convert_dict_to_str(data):
+        if "metadata" in data["mainInvoice"]:
+            data["mainInvoice"]["metadata"] = json.dumps(data["mainInvoice"]["metadata"])
+        if "customerMetadata" in data:
+            data["customerMetadata"] = json.dumps(data["customerMetadata"])
+
+        for i, k in enumerate(data["subInvoices"]):
+            if "metadata" in k:
+                data["subInvoices"][i]["metadata"] = json.dumps(k["metadata"])
+
+        return data
+
+    def reduce_multi_invoice(self, preferred_tax_rate, main_invoice, customer_invoice, sub_invoices, **kwargs):
+        """
+        کاهش فاکتور تسهیمی
+
+        :param float preferred_tax_rate: نرخ مالیات بین 0 تا 1
+        :param dict main_invoice: اطلاعات فاکتور اصلی
+        :param list customer_invoice: اطلاعات فاکتور مشتری
+        :param list sub_invoices: اطلاعات ذینفعان
+        :return: dict
+        """
+
+        return self.__reduce_invoice("reduceMultiInvoice", preferred_tax_rate=preferred_tax_rate,
+                                     main_invoice=main_invoice, sub_invoices=sub_invoices,
+                                     customer_invoice=customer_invoice, **kwargs)
+
+    def reduce_multi_invoice_and_cash_out(self, preferred_tax_rate, main_invoice, customer_invoice, sub_invoices,
+                                          tool_code=None, **kwargs):
+        """
+        کاهش فاکتور تسهیمی و برگشت بلافاصله مبلغ به حساب مشتری
+
+        :param float preferred_tax_rate: نرخ مالیات بین 0 تا 1
+        :param dict main_invoice: اطلاعات فاکتور اصلی
+        :param list customer_invoice: اطلاعات فاکتور مشتری
+        :param list sub_invoices: اطلاعات ذینفعان
+        :param str tool_code: کد ابزار تسویه
+        :return: dict
+        """
+        if tool_code is not None:
+            kwargs["toolCode"] = tool_code
+
+        return self.__reduce_invoice("reduceMultiInvoiceAndCashout", preferred_tax_rate=preferred_tax_rate,
+                                     main_invoice=main_invoice, sub_invoices=sub_invoices,
+                                     customer_invoice=customer_invoice, **kwargs)
+
+    def __reduce_invoice(self, service, preferred_tax_rate, main_invoice, customer_invoice, sub_invoices, **kwargs):
+        """
+        :param str service: آدرس سرویس
+        :param float preferred_tax_rate: نرخ مالیات بین 0 تا 1
+        :param dict main_invoice: اطلاعات فاکتور اصلی
+        :param list customer_invoice: اطلاعات فاکتور مشتری
+        :param list sub_invoices: اطلاعات ذینفعان
+        :return: dict
+        """
+        params = {"data": kwargs}
+        params["data"]["preferredTaxRate"] = preferred_tax_rate
+        params["data"]["mainInvoice"] = main_invoice
+        params["data"]["subInvoices"] = sub_invoices
+        params["data"]["customerInvoiceItemVOs"] = customer_invoice
+        self._validate(params, service)
+
+        params["data"] = json.dumps(self.__convert_dict_to_str(params["data"]))
+
+        return self._request.call(
+            sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/" + str(service), method_type="post"),
+            params=params, headers=self._get_headers(), **kwargs)
