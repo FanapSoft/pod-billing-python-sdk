@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import unittest
+from random import randint
 
 from pod_export import PodExport
 
@@ -62,7 +63,7 @@ class TestPodBilling(unittest.TestCase):
     def setUp(self):
         self.__billing = PodBilling(api_token=API_TOKEN, server_type=SERVER_MODE)
 
-    def test_1_issue_invoice(self):
+    def test_01_issue_invoice(self):
         products = get_products()
 
         result = self.__billing.issue_invoice(products=products, guild_code=GUILD_CODE)
@@ -70,7 +71,7 @@ class TestPodBilling(unittest.TestCase):
         self.assertEqual(len(result["invoiceItemSrvs"]), 2, msg="issue invoice : check count product")
         self.assertEqual(result["guildSrv"]["code"], GUILD_CODE, msg="issue invoice : check guild code")
 
-    def test_1_issue_invoice_all_params(self):
+    def test_01_issue_invoice_all_params(self):
         products = get_products()
 
         params = {
@@ -105,7 +106,7 @@ class TestPodBilling(unittest.TestCase):
         self.assertEqual(result["guildSrv"]["code"], GUILD_CODE, msg="issue invoice (all params) : check guild code")
         self.assertEqual(result["userSrv"]["id"], USER_ID, msg="issue invoice (all params) : check customer user id")
 
-    def test_1_issue_invoice_validation_error(self):
+    def test_01_issue_invoice_validation_error(self):
         products = get_products()
 
         params = {
@@ -121,39 +122,39 @@ class TestPodBilling(unittest.TestCase):
 
         return self.__billing.issue_invoice(products=products, guild_code=GUILD_CODE, **kwargs)
 
-    def test_2_pay_invoice(self):
+    def test_02_pay_invoice(self):
         invoice = self.__issue_invoice()
         self.assertEqual(self.__billing.pay_invoice(invoice["id"]), True, msg="pay invoice : successful")
         with self.assertRaises(APIException, msg="pay invoice : already pay"):
             self.__billing.pay_invoice(invoice["id"])
 
-    def test_2_pay_invoice_required_params(self):
+    def test_02_pay_invoice_required_params(self):
         with self.assertRaises(TypeError, msg="pay invoice : required param"):
             self.__billing.pay_invoice()
 
-    def test_2_pay_invoice_validation_error(self):
+    def test_02_pay_invoice_validation_error(self):
         with self.assertRaises(InvalidDataException, msg="pay invoice : validation error"):
             self.__billing.pay_invoice("abcd")
 
-    def test_3_pay_invoice_by_credit(self):
+    def test_03_pay_invoice_by_credit(self):
         invoice = self.__issue_invoice_by_other_business()
         self.assertEqual(self.__billing.pay_invoice_by_credit(invoice["id"]), True, msg="pay invoice : successful")
         with self.assertRaises(APIException, msg="pay invoice : already pay"):
             self.__billing.pay_invoice_by_credit(invoice["id"])
 
-    def test_3_pay_invoice_by_credit_required_params(self):
+    def test_03_pay_invoice_by_credit_required_params(self):
         with self.assertRaises(TypeError, msg="pay invoice : required param"):
             self.__billing.pay_invoice_by_credit()
 
-    def test_3_pay_invoice_by_credit_validation_error(self):
+    def test_03_pay_invoice_by_credit_validation_error(self):
         with self.assertRaises(InvalidDataException, msg="pay invoice : validation error"):
             self.__billing.pay_invoice_by_credit("abcd")
 
-    def test_4_get_invoice_list(self):
+    def test_04_get_invoice_list(self):
         invoices = self.__billing.get_invoice_list()
         self.assertIsInstance(invoices, list, msg="get invoice list : check instance")
 
-    def test_4_get_invoice_list_all_params(self):
+    def test_04_get_invoice_list_all_params(self):
         params = {
             "page": 1,
             "size": 10,
@@ -178,7 +179,7 @@ class TestPodBilling(unittest.TestCase):
         invoices = self.__billing.get_invoice_list(**params)
         self.assertIsInstance(invoices, list, msg="get invoice list ( all params ) : check instance")
 
-    def test_4_get_invoice_list_first_id(self):
+    def test_04_get_invoice_list_first_id(self):
         params = {
             "firstId": 0
         }
@@ -186,7 +187,7 @@ class TestPodBilling(unittest.TestCase):
         invoices = self.__billing.get_invoice_list(**params)
         self.assertIsInstance(invoices, list, msg="get invoice list ( first id ) : check instance")
 
-    def test_4_get_invoice_list_last_id(self):
+    def test_04_get_invoice_list_last_id(self):
         params = {
             "lastId": 0
         }
@@ -194,7 +195,7 @@ class TestPodBilling(unittest.TestCase):
         invoices = self.__billing.get_invoice_list(**params)
         self.assertIsInstance(invoices, list, msg="get invoice list ( last id ) : check instance")
 
-    def test_4_get_invoice_list_validation_error(self):
+    def test_04_get_invoice_list_validation_error(self):
         params = {
             "lastId": 0,
             "firstId": 0
@@ -202,19 +203,19 @@ class TestPodBilling(unittest.TestCase):
         with self.assertRaises(InvalidDataException, msg="get invoice list (validation error) : set first id, last id"):
             self.__billing.get_invoice_list(**params)
 
-    def test_5_get_invoice_list_by_metadata(self):
+    def test_05_get_invoice_list_by_metadata(self):
         meta_query = {"field": "name", "is": "reza"}
         invoices = self.__billing.get_invoice_list_by_metadata(meta_query=meta_query)
         self.assertIsInstance(invoices, list, msg="get invoice list by metadata : check instance")
 
-    def test_5_get_invoice_list_by_metadata_validation_error_meta_query(self):
+    def test_05_get_invoice_list_by_metadata_validation_error_meta_query(self):
         meta_query = "{\"field\": \"name\", \"is\": \"reza\"}"
 
         with self.assertRaises(InvalidDataException,
                                msg="get invoice list by metadata : validation error meta_query"):
             self.__billing.get_invoice_list_by_metadata(meta_query=meta_query)
 
-    def test_5_get_invoice_list_by_metadata_validation_error_params(self):
+    def test_05_get_invoice_list_by_metadata_validation_error_params(self):
         meta_query = {"field": "name", "is": "reza"}
         params = {
             "isPayed": "true",
@@ -224,11 +225,11 @@ class TestPodBilling(unittest.TestCase):
                                msg="get invoice list by metadata : validation error params"):
             self.__billing.get_invoice_list_by_metadata(meta_query=meta_query, **params)
 
-    def test_5_get_invoice_list_by_metadata_required_params(self):
+    def test_05_get_invoice_list_by_metadata_required_params(self):
         with self.assertRaises(TypeError, msg="get invoice list by metadata : required params"):
             self.__billing.get_invoice_list_by_metadata()
 
-    def test_6_get_invoice_list_as_file(self):
+    def test_06_get_invoice_list_as_file(self):
         params = {
             "lastNRows": 0
         }
@@ -237,7 +238,7 @@ class TestPodBilling(unittest.TestCase):
         self.assertIsInstance(result, dict, msg="get invoice list as file : check instance")
         self.assertEqual(result["service"], "/nzh/biz/getInvoiceList/", msg="get invoice list as file : check service")
 
-    def test_6_get_invoice_list_as_file_all_params(self):
+    def test_06_get_invoice_list_as_file_all_params(self):
         params = {
             "lastNRows": 0,
             "offset": 0,
@@ -265,11 +266,11 @@ class TestPodBilling(unittest.TestCase):
         self.assertEqual(result["service"], "/nzh/biz/getInvoiceList/",
                          msg="get invoice list as file (all params) : check service")
 
-    def test_6_get_invoice_list_as_file_required_params(self):
+    def test_06_get_invoice_list_as_file_required_params(self):
         with self.assertRaises(InvalidDataException, msg="get invoice list as file : required params"):
             self.__billing.get_invoice_list_as_file()
 
-    def test_6_get_invoice_list_as_file_validation_error(self):
+    def test_06_get_invoice_list_as_file_validation_error(self):
         params = {
             "lastNRows": 0,
             "toDate": "1398-12-12 10:20",
@@ -278,31 +279,31 @@ class TestPodBilling(unittest.TestCase):
         with self.assertRaises(InvalidDataException, msg="get invoice list as file : validation error"):
             self.__billing.get_invoice_list_as_file(**params)
 
-    def test_7_verify_invoice_required_params(self):
+    def test_07_verify_invoice_required_params(self):
         with self.assertRaises(TypeError, msg="verify invoice : required params"):
             self.__billing.verify_invoice()
 
-    def test_7_verify_invoice_validation_error(self):
+    def test_07_verify_invoice_validation_error(self):
         with self.assertRaises(InvalidDataException, msg="verify invoice : validation error"):
             self.__billing.verify_invoice("invoice id")
 
-    def test_8_verify_invoice_by_bill_number_required_params(self):
+    def test_08_verify_invoice_by_bill_number_required_params(self):
         with self.assertRaises(TypeError, msg="verify invoice by bill_number : required params"):
             self.__billing.verify_invoice_by_bill_number()
 
-    def test_8_verify_invoice_by_bill_number_not_exists(self):
+    def test_08_verify_invoice_by_bill_number_not_exists(self):
         with self.assertRaises(APIException, msg="verify invoice by bill_number : not exists bill number"):
             self.__billing.verify_invoice_by_bill_number("invoice 4564564_id")
 
-    def test_8_verify_invoice_by_bill_number_validation_error(self):
+    def test_08_verify_invoice_by_bill_number_validation_error(self):
         with self.assertRaises(InvalidDataException, msg="verify invoice by bill_number : validation error"):
             self.__billing.verify_invoice_by_bill_number(123)
 
-    def test_9_verify_and_close_invoice_required_params(self):
+    def test_09_verify_and_close_invoice_required_params(self):
         with self.assertRaises(TypeError, msg="verify and close invoice : required params"):
             self.__billing.verify_and_close_invoice()
 
-    def test_9_verify_and_close_invoice_validation_error(self):
+    def test_09_verify_and_close_invoice_validation_error(self):
         with self.assertRaises(InvalidDataException, msg="verify and close invoice : validation error"):
             self.__billing.verify_and_close_invoice("invoice id")
 
@@ -608,3 +609,494 @@ class TestPodBilling(unittest.TestCase):
     def test_test_20_reduce_required_params(self):
         with self.assertRaises(TypeError, msg="reduce invoice : required params"):
             self.__billing.reduce_invoice()
+
+    def test_21_issue_multi_invoice(self):
+        customer_invoice = [
+            {
+                "productId": 0,
+                "price": 500,
+                "quantity": 2,
+                "description": "محصول اول - مشتری"
+            }
+            , {
+                "productId": 0,
+                "price": 300,
+                "quantity": 1,
+                "description": "محصول دوم - مشتری"
+            }
+        ]
+
+        main_invoice = {
+            "invoiceItemVOs": [{
+                "productId": 0,
+                "price": 350,
+                "quantity": 2,
+                "description": "محصول اول - کسب و کار مالک فاکتور"
+            }, {
+                "productId": 0,
+                "price": 100,
+                "quantity": 1,
+                "description": "محصول دوم - کسب و کار مالک فاکتور"
+            }
+            ],
+            "guildCode": GUILD_CODE
+        }
+
+        sub_invoices = [
+            {
+                "businessId": DEALER_BUSINESS_IDs[0],
+                "guildCode": GUILD_CODE,
+                "invoiceItemVOs": [
+                    {
+                        "productId": 0,
+                        "price": 50,
+                        "quantity": 2,
+                        "description": "پورسانت - کسب و کار {} ذینفع اول فاکتور".format(DEALER_BUSINESS_IDs[0])
+                    }
+                ]
+            }, {
+                "businessId": DEALER_BUSINESS_IDs[0],
+                "guildCode": GUILD_CODE,
+                "invoiceItemVOs": [
+                    {
+                        "productId": 0,
+                        "price": 30,
+                        "quantity": 2,
+                        "description": "کارمزد بازاریابی - کسب و کار {} ذینفع اول فاکتور".format(DEALER_BUSINESS_IDs[0])
+                    }
+                ]
+            }, {
+                "businessId": DEALER_BUSINESS_IDs[1],
+                "guildCode": GUILD_CODE,
+                "invoiceItemVOs": [
+                    {
+                        "productId": 0,
+                        "price": 70,
+                        "quantity": 2,
+                        "description": "سهم از محصول اول - کسب و کار {} ذینفع دوم فاکتور".format(DEALER_BUSINESS_IDs[1])
+                    }
+                    ,
+                    {
+                        "productId": 0,
+                        "price": 200,
+                        "quantity": 1,
+                        "description": "سهم از محصول دوم - کسب و کار {} ذینفع دوم فاکتور".format(DEALER_BUSINESS_IDs[1])
+                    }
+                ]
+            }
+        ]
+
+        other_params = {}
+
+        invoice = self.__billing.issue_multi_invoice(main_invoice=main_invoice, customer_invoice=customer_invoice,
+                                                     sub_invoices=sub_invoices, **other_params)
+
+        self.assertIsInstance(invoice, dict, msg="issue multi invoice : check instance")
+
+    def test_21_issue_multi_invoice_all_params(self):
+        bill_number = "Py_{}".format(randint(1, 100000000))
+        customer_invoice = [
+            {
+                "productId": 0,
+                "price": 500,
+                "quantity": 2,
+                "description": "محصول اول - مشتری"
+            }
+            , {
+                "productId": 0,
+                "price": 300,
+                "quantity": 1,
+                "description": "محصول دوم - مشتری"
+            }
+        ]
+
+        main_invoice = {
+            "invoiceItemVOs": [{
+                "productId": 0,
+                "price": 350,
+                "quantity": 2,
+                "description": "محصول اول - کسب و کار مالک فاکتور"
+            }, {
+                "productId": 0,
+                "price": 100,
+                "quantity": 1,
+                "description": "محصول دوم - کسب و کار مالک فاکتور"
+            }
+            ],
+            "guildCode": GUILD_CODE,
+            "billNumber": bill_number,  # Optional
+            "metadata": {  # Optional
+                "multi_invoice": True,
+                "customer": {
+                    "name": "رضا",
+                    "family": "زارع"
+                }
+            },
+            "description": "توضیحات فاکتور - نمایش در پنل مالک فاکتور"  # Optional
+        }
+
+        sub_invoices = [
+            {
+                "businessId": DEALER_BUSINESS_IDs[0],
+                "guildCode": GUILD_CODE,
+                "invoiceItemVOs": [
+                    {
+                        "productId": 0,
+                        "price": 50,
+                        "quantity": 2,
+                        "description": "پورسانت - کسب و کار {} ذینفع اول فاکتور".format(DEALER_BUSINESS_IDs[0])
+                    }
+                ],
+                "billNumber": bill_number + "_sub" + str(DEALER_BUSINESS_IDs[0]),  # Optional
+                "metadata": {  # optional
+                    "key_1": "value_1",
+                    "key_2": 2
+                },
+                "description": "توضیحات فاکتور - نمایش در پنل {} به عنوان ذینفع اول فاکتور".format(
+                    DEALER_BUSINESS_IDs[0])  # Optional
+            }, {
+                "businessId": DEALER_BUSINESS_IDs[0],
+                "guildCode": GUILD_CODE,
+                "invoiceItemVOs": [
+                    {
+                        "productId": 0,
+                        "price": 30,
+                        "quantity": 2,
+                        "description": "کارمزد بازاریابی - کسب و کار {} ذینفع اول فاکتور".format(DEALER_BUSINESS_IDs[0])
+                    }
+                ],
+                "billNumber": bill_number + "_marketer_sub" + str(DEALER_BUSINESS_IDs[0]),  # Optional
+                "metadata": {  # optional
+                    "key_1": "value_1",
+                    "key_2": 2
+                },
+                "description": "توضیحات فاکتور - نمایش در پنل {} به عنوان ذینفع اول فاکتور".format(
+                    DEALER_BUSINESS_IDs[0])  # Optional
+            }, {
+                "businessId": DEALER_BUSINESS_IDs[1],
+                "guildCode": GUILD_CODE,
+                "invoiceItemVOs": [
+                    {
+                        "productId": 0,
+                        "price": 70,
+                        "quantity": 2,
+                        "description": "سهم از محصول اول - کسب و کار {} ذینفع دوم فاکتور".format(DEALER_BUSINESS_IDs[1])
+                    }
+                    ,
+                    {
+                        "productId": 0,
+                        "price": 200,
+                        "quantity": 1,
+                        "description": "سهم از محصول دوم - کسب و کار {} ذینفع دوم فاکتور".format(DEALER_BUSINESS_IDs[1])
+                    }
+                ],
+                "billNumber": bill_number + "_sub" + str(DEALER_BUSINESS_IDs[1]),  # optional
+                "metadata": {  # optional
+                    "products": [
+                        {
+                            "id": 0,
+                            "share": 35
+                        },
+                        {
+                            "id": 0,
+                            "share": 45
+                        }
+                    ]
+                },
+                "description": "توضیحات فاکتور - نمایش در پنل {} به عنوان ذینفع دوم فاکتور".format(
+                    DEALER_BUSINESS_IDs[1])  # Optional
+            }
+        ]
+
+        other_params = {
+            "redirectURL": "http://google.com",  # Optional
+            "userId": USER_ID,  # Optional
+            "currencyCode": "IRR",  # Optional
+            "preferredTaxRate": 0.10,  # Optional
+            "verificationNeeded": False,  # Optional
+            "customerDescription": "این توضیحات در فاکتور مشتری نمایش داده می شود",  # Optional
+            "customerMetadata": {  # Optional
+                "time": "1398/12/01 10:48:59",
+                "os": "XUbuntu/ Linux 64bit"
+            }
+        }
+
+        invoice = self.__billing.issue_multi_invoice(main_invoice=main_invoice, customer_invoice=customer_invoice,
+                                                     sub_invoices=sub_invoices, **other_params)
+        self.assertIsInstance(invoice, dict, msg="issue multi invoice : check instance")
+        self.assertEqual(invoice["subInvoices"][0]["business"]["id"], DEALER_BUSINESS_IDs[0],
+                         msg="issue multi invoice : check sub business id")
+
+    def test_21_issue_multi_invoice_required_params(self):
+        with self.assertRaises(TypeError, msg="issue multi invoice : required params"):
+            self.__billing.issue_multi_invoice()
+
+    def test_21_issue_multi_invoice_validation_error(self):
+        customer_invoice = [
+            {
+                "productId": "0",  # should be int
+                "price": "500",  # should be int
+                "quantity": "2",  # should be int
+                "description": "محصول اول - مشتری"
+            }
+            , {
+                "productId": 0,
+                "price": 300,
+                "quantity": 1
+                # "description": "محصول دوم - مشتری"  # required
+            }
+        ]
+
+        main_invoice = {
+            "invoiceItemVOs": [{
+                "productId": 0,
+                "price": 350,
+                "quantity": 2,
+                "description": "محصول اول - کسب و کار مالک فاکتور"
+            }, {
+                "productId": 0,
+                "price": 100,
+                "quantity": 1,
+                "description": "محصول دوم - کسب و کار مالک فاکتور"
+            }
+            ],
+            "guildCode": GUILD_CODE
+        }
+
+        sub_invoices = [
+            {
+                "businessId": DEALER_BUSINESS_IDs[0],
+                "guildCode": GUILD_CODE,
+                "invoiceItemVOs": [
+                    {
+                        "productId": 0,
+                        "price": 50,
+                        "quantity": 2,
+                        "description": "پورسانت - کسب و کار {} ذینفع اول فاکتور".format(DEALER_BUSINESS_IDs[0])
+                    }
+                ]
+            }, {
+                "businessId": DEALER_BUSINESS_IDs[0],
+                "guildCode": GUILD_CODE,
+                "invoiceItemVOs": [
+                    {
+                        "productId": 0,
+                        "price": 30,
+                        "quantity": 2,
+                        "description": "کارمزد بازاریابی - کسب و کار {} ذینفع اول فاکتور".format(DEALER_BUSINESS_IDs[0])
+                    }
+                ]
+            }, {
+                "businessId": DEALER_BUSINESS_IDs[1],
+                "guildCode": GUILD_CODE,
+                "invoiceItemVOs": [
+                    {
+                        "productId": 0,
+                        "price": 70,
+                        "quantity": 2,
+                        "description": "سهم از محصول اول - کسب و کار {} ذینفع دوم فاکتور".format(DEALER_BUSINESS_IDs[1])
+                    }
+                    ,
+                    {
+                        "productId": 0,
+                        "price": "200",
+                        "quantity": 1,
+                        "description": "سهم از محصول دوم - کسب و کار {} ذینفع دوم فاکتور".format(DEALER_BUSINESS_IDs[1])
+                    }
+                ]
+            }
+        ]
+
+        other_params = {
+            "redirectURL": "abcd",  # should url format
+            "userId": str(USER_ID),  # should int
+            "preferredTaxRate": 10,  # should between 0 to 1
+            "verificationNeeded": "False"  # should boolean
+        }
+        with self.assertRaises(InvalidDataException, msg="issue multi invoice : validation error"):
+            self.__billing.issue_multi_invoice(main_invoice=main_invoice, customer_invoice=customer_invoice,
+                                               sub_invoices=sub_invoices, **other_params)
+
+    def __issue_multi_invoice(self, preferred_tax_rate):
+        customer_invoice = [
+            {
+                "productId": 0,
+                "price": 500,
+                "quantity": 2,
+                "description": "محصول اول - مشتری"
+            }
+        ]
+
+        main_invoice = {
+            "invoiceItemVOs": [{
+                "productId": 0,
+                "price": 450,
+                "quantity": 2,
+                "description": "محصول اول - کسب و کار مالک فاکتور"
+            }],
+            "guildCode": GUILD_CODE
+        }
+
+        sub_invoices = [
+            {
+                "businessId": DEALER_BUSINESS_IDs[0],
+                "guildCode": GUILD_CODE,
+                "invoiceItemVOs": [
+                    {
+                        "productId": 0,
+                        "price": 50,
+                        "quantity": 2,
+                        "description": "پورسانت - کسب و کار {} ذینفع اول فاکتور".format(DEALER_BUSINESS_IDs[0])
+                    }
+                ]
+            }
+        ]
+
+        other_params = {
+            "customerDescription": "این توضیحات در فاکتور مشتری نمایش داده می شود",  # Optional
+            "preferredTaxRate": preferred_tax_rate  # Optional
+        }
+
+        return self.__billing.issue_multi_invoice(main_invoice=main_invoice, customer_invoice=customer_invoice,
+                                                  sub_invoices=sub_invoices, **other_params)
+
+    def test_22_reduce_multi_invoice(self):
+        preferred_tax_rate = 0.09
+        invoice = self.__issue_multi_invoice(preferred_tax_rate=preferred_tax_rate)
+
+        main_invoice_updated = {
+            "id": invoice["id"],
+            "reduceInvoiceItemVOs": [{
+                "id": invoice["invoiceItemSrvs"][0]["id"],
+                "price": 350,
+                "quantity": 1,
+                "description": "محصول اول - کسب و کار مالک فاکتور - کاهش تعداد از 2 به 1 - کاهش قیمت از 450 به 350"
+            }]
+        }
+        customer_invoice_updated = [{
+            "id": invoice["customerInvoice"]["invoiceItemSrvs"][0]["id"],
+            "price": 400,
+            "quantity": 1,
+            "description": "محصول اول - مشتری - کاهش تعداد از 2 به 1 - کاهش قیمت از 500 به 400"
+        }]
+
+        sub_invoices_updated = [
+            {
+                "id": invoice["subInvoices"][0]["id"],
+                "reduceInvoiceItemVOs": [
+                    {
+                        "id": invoice["subInvoices"][0]["invoiceItemSrvs"][0]["id"],
+                        "price": 50,
+                        "quantity": 1,
+                        "description": "پورسانت - کسب و کار {} ذینفع اول فاکتور - کاهش تعداد از 2 به 1".format(
+                            DEALER_BUSINESS_IDs[0])
+                    }
+                ]
+            }
+        ]
+
+        result = self.__billing.reduce_multi_invoice(preferred_tax_rate=preferred_tax_rate,
+                                                     main_invoice=main_invoice_updated,
+                                                     customer_invoice=customer_invoice_updated,
+                                                     sub_invoices=sub_invoices_updated)
+
+        self.assertIsInstance(result, dict, msg="reduce multi invoice : check instance")
+        self.assertEqual(result["subInvoices"][0]["business"]["id"], DEALER_BUSINESS_IDs[0],
+                         msg="reduce multi invoice : check sub business id")
+
+    def test_22_reduce_multi_invoice_required_params(self):
+        with self.assertRaises(TypeError, msg="reduce multi invoice : required params"):
+            self.__billing.reduce_multi_invoice()
+
+    def test_22_reduce_multi_invoice_validation_error(self):
+        invoice = self.__issue_multi_invoice(preferred_tax_rate=0.1)
+        customer_invoice = [
+            {
+                "id": str(invoice["customerInvoice"]["invoiceItemSrvs"][0]["id"]),  # should be int
+                "price": "500",  # should be int
+                "quantity": "2",  # should be int
+                "description": "محصول اول - مشتری"
+            }
+        ]
+        with self.assertRaises(InvalidDataException, msg="reduce multi invoice : validation error"):
+            self.__billing.reduce_multi_invoice(preferred_tax_rate=1.0, main_invoice={},
+                                                customer_invoice=customer_invoice,
+                                                sub_invoices=[])
+
+    def test_23_reduce_multi_invoice_and_cash_out(self):
+        preferred_tax_rate = 0.09
+        invoice = self.__issue_multi_invoice(preferred_tax_rate=preferred_tax_rate)
+
+        main_invoice_updated = {
+            "id": invoice["id"],
+            "reduceInvoiceItemVOs": [{
+                "id": invoice["invoiceItemSrvs"][0]["id"],
+                "price": 350,
+                "quantity": 1,
+                "description": "محصول اول - کسب و کار مالک فاکتور - کاهش تعداد از 2 به 1 - کاهش قیمت از 450 به 350"
+            }]
+        }
+        customer_invoice_updated = [{
+            "id": invoice["customerInvoice"]["invoiceItemSrvs"][0]["id"],
+            "price": 400,
+            "quantity": 1,
+            "description": "محصول اول - مشتری - کاهش تعداد از 2 به 1 - کاهش قیمت از 500 به 400"
+        }]
+
+        sub_invoices_updated = [
+            {
+                "id": invoice["subInvoices"][0]["id"],
+                "reduceInvoiceItemVOs": [
+                    {
+                        "id": invoice["subInvoices"][0]["invoiceItemSrvs"][0]["id"],
+                        "price": 50,
+                        "quantity": 1,
+                        "description": "پورسانت - کسب و کار {} ذینفع اول فاکتور - کاهش تعداد از 2 به 1".format(
+                            DEALER_BUSINESS_IDs[0])
+                    }
+                ]
+            }
+        ]
+
+        result = self.__billing.reduce_multi_invoice_and_cash_out(preferred_tax_rate=preferred_tax_rate,
+                                                                  main_invoice=main_invoice_updated,
+                                                                  customer_invoice=customer_invoice_updated,
+                                                                  sub_invoices=sub_invoices_updated)
+
+        self.assertIsInstance(result, dict, msg="reduce multi invoice and cash out : check instance")
+        self.assertEqual(result["subInvoices"][0]["business"]["id"], DEALER_BUSINESS_IDs[0],
+                         msg="reduce multi invoice and cash out : check sub business id")
+
+    def test_23_reduce_multi_invoice_and_cash_out_required_params(self):
+        with self.assertRaises(TypeError, msg="reduce multi invoice and cash out : required params"):
+            self.__billing.reduce_multi_invoice_and_cash_out()
+
+    def test_23_reduce_multi_invoice_and_cash_out_validation_error(self):
+        invoice = self.__issue_multi_invoice(preferred_tax_rate=0.1)
+        customer_invoice = [
+            {
+                "id": str(invoice["customerInvoice"]["invoiceItemSrvs"][0]["id"]),  # should be int
+                "price": "500",  # should be int
+                "quantity": "2",  # should be int
+                "description": "محصول اول - مشتری"
+            }
+        ]
+
+        sub_invoices = [
+            {
+                "id": invoice["subInvoices"][0]["id"],
+                "reduceInvoiceItemVOs": [
+                    {
+                        "id": invoice["subInvoices"][0]["invoiceItemSrvs"][0]["id"],
+                        "price": "50",   # should be int
+                        # "quantity": 1,   # required
+                        "description": "پورسانت - کسب و کار {} ذینفع اول فاکتور - کاهش تعداد از 2 به 1".format(
+                            DEALER_BUSINESS_IDs[0])
+                    }
+                ]
+            }
+        ]
+        with self.assertRaises(InvalidDataException, msg="reduce multi invoice and cash out : validation error"):
+            self.__billing.reduce_multi_invoice_and_cash_out(preferred_tax_rate=1.0, main_invoice={},
+                                                             customer_invoice=customer_invoice,
+                                                             sub_invoices=sub_invoices)
