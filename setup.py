@@ -9,9 +9,9 @@ with open("pod_billing/version.py") as fp:
 
 
 requires = [
-    "pod-base>=1.0.2,<2",
-    "pod-export<2",
-    "pod-common<2",
+    "pod-base>=1.0.3,<2",
+    "pod-export>=1.0.1,<2",
+    "pod-common>=1.0.2,<2",
 ]
 
 setup(

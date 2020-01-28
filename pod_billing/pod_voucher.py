@@ -17,7 +17,7 @@ class PodVoucher(PodBase):
     def __init__(self, api_token, token_issuer="1", server_type="sandbox", config_path=None,
                  sc_api_key="", sc_voucher_hash=None):
         here = path.abspath(path.dirname(__file__))
-        self._services_file_path = path.join(here, "services_voucher.ini")
+        self._services_file_path = path.join(here, "services_voucher.json")
         super(PodVoucher, self).__init__(api_token, token_issuer, server_type, config_path, sc_api_key, sc_voucher_hash,
                                          path.join(here, "json_schema_voucher.json"))
 
@@ -118,8 +118,9 @@ class PodVoucher(PodBase):
         else:
             self.__check_count_hash(kwargs["count[]"], kwargs["hash[]"])
 
-        return self._request.call(sc_product_id=super(PodVoucher, self)._get_sc_product_id(
-            "/nzh/biz/" + str(service), method_type="post"), params=kwargs, headers=self._get_headers(), **kwargs)
+        return self._request.call(
+            super(PodVoucher, self)._get_sc_product_settings("/nzh/biz/" + str(service), method_type="post"),
+            params=kwargs, headers=self._get_headers(), **kwargs)
 
     @staticmethod
     def __check_count_hash(cnt_vouchers, hash_list):
@@ -161,8 +162,9 @@ class PodVoucher(PodBase):
         kwargs["voucherHash"] = voucher_hash
 
         self._validate(kwargs, "applyVoucher")
-        return self._request.call(sc_product_id=super(PodVoucher, self)._get_sc_product_id(
-            "/nzh/biz/applyVoucher", method_type="post"), params=kwargs, headers=self._get_headers(), **kwargs)
+        return self._request.call(
+            super(PodVoucher, self)._get_sc_product_settings("/nzh/biz/applyVoucher", method_type="post"),
+            params=kwargs, headers=self._get_headers(), **kwargs)
 
     def get_voucher_list(self, page=1, size=50, **kwargs):
         """
@@ -183,7 +185,7 @@ class PodVoucher(PodBase):
             del kwargs["productId"]
 
         self._validate(kwargs, "getVoucherList")
-        return self._request.call(sc_product_id=super(PodVoucher, self)._get_sc_product_id("/nzh/biz/getVoucherList"),
+        return self._request.call(super(PodVoucher, self)._get_sc_product_settings("/nzh/biz/getVoucherList"),
                                   params=kwargs, headers=self._get_headers(), **kwargs)
 
     def activate_voucher(self, voucher_id, **kwargs):
@@ -196,9 +198,9 @@ class PodVoucher(PodBase):
         kwargs["id"] = voucher_id
 
         self._validate(kwargs, "activateVoucher")
-        return self._request.call(sc_product_id=super(PodVoucher, self)._get_sc_product_id("/nzh/biz/activateVoucher",
-                                                                                           method_type="post"),
-                                  params=kwargs, headers=self._get_headers(), **kwargs)
+        return self._request.call(
+            super(PodVoucher, self)._get_sc_product_settings("/nzh/biz/activateVoucher", method_type="post"),
+            params=kwargs, headers=self._get_headers(), **kwargs)
 
     def deactivate_voucher(self, voucher_id, **kwargs):
         """
@@ -210,6 +212,6 @@ class PodVoucher(PodBase):
         kwargs["id"] = voucher_id
 
         self._validate(kwargs, "deactivateVoucher")
-        return self._request.call(sc_product_id=super(PodVoucher, self)._get_sc_product_id("/nzh/biz/deactivateVoucher",
-                                                                                           method_type="post"),
-                                  params=kwargs, headers=self._get_headers(), **kwargs)
+        return self._request.call(
+            super(PodVoucher, self)._get_sc_product_settings("/nzh/biz/deactivateVoucher", method_type="post"),
+            params=kwargs, headers=self._get_headers(), **kwargs)

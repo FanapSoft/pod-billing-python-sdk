@@ -17,7 +17,7 @@ class PodBilling(PodBase):
     def __init__(self, api_token, token_issuer="1", server_type="sandbox", config_path=None,
                  sc_api_key="", sc_voucher_hash=None):
         here = path.abspath(path.dirname(__file__))
-        self._services_file_path = path.join(here, "services.ini")
+        self._services_file_path = path.join(here, "services.json")
         super(PodBilling, self).__init__(api_token, token_issuer, server_type, config_path, sc_api_key, sc_voucher_hash,
                                          path.join(here, "json_schema.json"))
         self.__init_module(config_path)
@@ -59,36 +59,35 @@ class PodBilling(PodBase):
         :param str guild_code: کد صنف
         :return: dict
         """
-        params = kwargs
-        params["productList"] = products
-        params["guildCode"] = guild_code
-        params["_ott_"] = kwargs.pop("ott", kwargs.pop("_ott_", None))
-        if params["_ott_"] is None:
-            params["_ott_"] = self.__common.get_ott()
+        kwargs["productList"] = products
+        kwargs["guildCode"] = guild_code
+        kwargs["_ott_"] = kwargs.pop("ott", kwargs.pop("_ott_", None))
+        if kwargs["_ott_"] is None:
+            kwargs["_ott_"] = self.__common.get_ott()
 
-        if "metadata" in params:
-            if type(params["metadata"]) == dict:
-                params["metadata"] = json.dumps(params["metadata"])
+        if "metadata" in kwargs:
+            if type(kwargs["metadata"]) == dict:
+                kwargs["metadata"] = json.dumps(kwargs["metadata"])
             else:
-                del params["metadata"]
+                del kwargs["metadata"]
 
-        if "eventMetadata" in params:
-            if type(params["eventMetadata"]) == dict:
-                params["eventMetadata"] = json.dumps(params["eventMetadata"])
+        if "eventMetadata" in kwargs:
+            if type(kwargs["eventMetadata"]) == dict:
+                kwargs["eventMetadata"] = json.dumps(kwargs["eventMetadata"])
             else:
-                del params["eventMetadata"]
+                del kwargs["eventMetadata"]
 
-        if "eventReminders" in params:
-            params["eventReminders"] = self.__convert_dict_to_str_in_list(params["eventReminders"])
+        if "eventReminders" in kwargs:
+            kwargs["eventReminders"] = self.__convert_dict_to_str_in_list(kwargs["eventReminders"])
 
-        self._validate(params, "issueInvoice")
-        del params["productList"]
-        (params["productId[]"], params["quantity[]"], params["discount[]"], params["productDescription[]"],
-         params["price[]"]) = self.__prepare_product(products)
+        self._validate(kwargs, "issueInvoice")
+        del kwargs["productList"]
+        (kwargs["productId[]"], kwargs["quantity[]"], kwargs["discount[]"], kwargs["productDescription[]"],
+         kwargs["price[]"]) = self.__prepare_product(products)
 
-        result = self._request.call(sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/issueInvoice",
-                                                                                             method_type="post"),
-                                    params=params, headers=self._get_headers(), **params)
+        result = self._request.call(
+            super(PodBilling, self)._get_sc_product_settings("/nzh/biz/issueInvoice", method_type="post"),
+            params=kwargs, headers=self._get_headers(), **kwargs)
         return result
 
     @staticmethod
@@ -137,9 +136,9 @@ class PodBilling(PodBase):
 
         del params["invoiceItemList"]
 
-        return self._request.call(sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/reduceInvoice",
-                                                                                           method_type="post"),
-                                  params=params, headers=self._get_headers(), **kwargs)
+        return self._request.call(
+            super(PodBilling, self)._get_sc_product_settings("/nzh/biz/reduceInvoice", method_type="post"),
+            params=params, headers=self._get_headers(), **kwargs)
 
     @staticmethod
     def __prepare_items(products):
@@ -169,26 +168,25 @@ class PodBilling(PodBase):
         :return: list
         """
 
-        params = kwargs
-        if "firstId" not in params and "lastId" not in params and "page" not in params:
-            params.setdefault("page", 1)
+        if "firstId" not in kwargs and "lastId" not in kwargs and "page" not in kwargs:
+            kwargs.setdefault("page", 1)
 
-        params.setdefault("size", 50)
-        if "page" in params:
-            params["offset"] = calc_offset(params["page"], params["size"])
-            del params["page"]
+        kwargs.setdefault("size", 50)
+        if "page" in kwargs:
+            kwargs["offset"] = calc_offset(kwargs["page"], kwargs["size"])
+            del kwargs["page"]
 
         if bill_number:
-            params["billNumber"] = bill_number
+            kwargs["billNumber"] = bill_number
         if from_date:
-            params["fromDate"] = from_date
+            kwargs["fromDate"] = from_date
         if to_date:
-            params["toDate"] = to_date
+            kwargs["toDate"] = to_date
 
-        self._validate(params, "getInvoiceList")
+        self._validate(kwargs, "getInvoiceList")
 
-        return self._request.call(sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/getInvoiceList"),
-                                  params=params, headers=self._get_headers(), **kwargs)
+        return self._request.call(super(PodBilling, self)._get_sc_product_settings("/nzh/biz/getInvoiceList"),
+                                  params=kwargs, headers=self._get_headers(), **kwargs)
 
     def get_invoice(self, invoice_id, **kwargs):
         """
@@ -221,17 +219,16 @@ class PodBilling(PodBase):
             }
             raise InvalidDataException(**info)
 
-        params = kwargs
-        params["offset"] = calc_offset(page, size)
-        params["size"] = size
-        params["metaQuery"] = meta_query
+        kwargs["offset"] = calc_offset(page, size)
+        kwargs["size"] = size
+        kwargs["metaQuery"] = meta_query
 
-        self._validate(params, "getInvoiceListByMetadata")
+        self._validate(kwargs, "getInvoiceListByMetadata")
 
-        params["metaQuery"] = json.dumps(meta_query)
+        kwargs["metaQuery"] = json.dumps(meta_query)
 
-        result = self._request.call(super(PodBilling, self)._get_sc_product_id("/getInvoiceListByMetadata"),
-                                    params=params, headers=self._get_headers(), **kwargs)
+        result = self._request.call(super(PodBilling, self)._get_sc_product_settings("/getInvoiceListByMetadata"),
+                                    params=kwargs, headers=self._get_headers(), **kwargs)
         return result
 
     def create_pre_invoice(self, user_id, products, guild_code, redirect_url, **kwargs):
@@ -247,18 +244,17 @@ class PodBilling(PodBase):
         if self._server_type != PodBase.PRODUCTION_MODE:
             raise PodException(message="سرویس ایجاد پیش فاکتور تنها در حالت Production کار می کند.")
 
-        params = kwargs
-        params.setdefault("token", self._api_token)
+        kwargs.setdefault("token", self._api_token)
 
-        params["productList"] = products
-        params["guildCode"] = guild_code
-        params["redirectUri"] = redirect_url
-        params["userId"] = user_id
+        kwargs["productList"] = products
+        kwargs["guildCode"] = guild_code
+        kwargs["redirectUri"] = redirect_url
+        kwargs["userId"] = user_id
 
-        self._validate(params, "createPreInvoice")
+        self._validate(kwargs, "createPreInvoice")
 
-        result = self._request.call(super(PodBilling, self)._get_sc_product_id("/createPreInvoice"), params=params,
-                                    headers=self._get_headers(), internal=False, **kwargs)
+        result = self._request.call(super(PodBilling, self)._get_sc_product_settings("/createPreInvoice"),
+                                    params=kwargs, headers=self._get_headers(), internal=False, **kwargs)
         print(result)
         return {
             "hash": result["result"],
@@ -293,9 +289,9 @@ class PodBilling(PodBase):
 
         self._validate(params, "verifyInvoice")
 
-        result = self._request.call(sc_product_id=super(PodBilling, self).
-                                    _get_sc_product_id("/nzh/biz/verifyInvoice", method_type="post"),
-                                    params=params, headers=self._get_headers(), **kwargs)
+        result = self._request.call(
+            super(PodBilling, self)._get_sc_product_settings("/nzh/biz/verifyInvoice", method_type="post"),
+            params=params, headers=self._get_headers(), **kwargs)
 
         return result
 
@@ -313,9 +309,9 @@ class PodBilling(PodBase):
 
         self._validate(params, "closeInvoice")
 
-        return self._request.call(sc_product_id=super(PodBilling, self).
-                                  _get_sc_product_id("/nzh/biz/closeInvoice", method_type="post"),
-                                  params=params, headers=self._get_headers(), **kwargs)
+        return self._request.call(
+            super(PodBilling, self)._get_sc_product_settings("/nzh/biz/closeInvoice", method_type="post"),
+            params=params, headers=self._get_headers(), **kwargs)
 
     def verify_and_close_invoice(self, invoice_id, **kwargs):
         """
@@ -331,9 +327,9 @@ class PodBilling(PodBase):
 
         self._validate(params, "verifyAndCloseInvoice")
 
-        return self._request.call(sc_product_id=super(PodBilling, self).
-                                  _get_sc_product_id("/nzh/biz/verifyAndCloseInvoice", method_type="post"),
-                                  params=params, headers=self._get_headers(), **kwargs)
+        return self._request.call(
+            super(PodBilling, self)._get_sc_product_settings("/nzh/biz/verifyAndCloseInvoice", method_type="post"),
+            params=params, headers=self._get_headers(), **kwargs)
 
     def cancel_invoice(self, invoice_id, **kwargs):
         """
@@ -349,9 +345,9 @@ class PodBilling(PodBase):
 
         self._validate(params, "cancelInvoice")
 
-        return self._request.call(sc_product_id=super(PodBilling, self).
-                                  _get_sc_product_id("/nzh/biz/cancelInvoice", method_type="post"),
-                                  params=params, headers=self._get_headers(), **kwargs)
+        return self._request.call(
+            super(PodBilling, self)._get_sc_product_settings("/nzh/biz/cancelInvoice", method_type="post"),
+            params=params, headers=self._get_headers(), **kwargs)
 
     def get_invoice_list_as_file(self, **kwargs):
         """
@@ -360,13 +356,10 @@ class PodBilling(PodBase):
         :param kwargs:
         :return: dict
         """
-        params = kwargs
+        self._validate(kwargs, "getInvoiceListAsFile")
 
-        self._validate(params, "getInvoiceListAsFile")
-
-        return self._request.call(sc_product_id=super(PodBilling, self).
-                                  _get_sc_product_id("/nzh/biz/getInvoiceListAsFile"), params=params,
-                                  headers=self._get_headers(), **kwargs)
+        return self._request.call(super(PodBilling, self)._get_sc_product_settings("/nzh/biz/getInvoiceListAsFile"),
+                                  params=kwargs, headers=self._get_headers(), **kwargs)
 
     def get_pay_invoice_by_wallet_link(self, invoice_id, redirect_url=None, call_url=None, token_issuer=1):
         """
@@ -410,7 +403,7 @@ class PodBilling(PodBase):
 
         self._validate(params, "payInvoiceByCredit")
         return self._request.call(
-            sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/payInvoiceByCredit", method_type="post"),
+            super(PodBilling, self)._get_sc_product_settings("/nzh/biz/payInvoiceByCredit", method_type="post"),
             params=params, headers=self._get_headers(), **kwargs)
 
     def pay_any_invoice_by_credit(self, invoice_id, wallet, **kwargs):
@@ -421,21 +414,17 @@ class PodBilling(PodBase):
         :param str wallet: کد کیف پول
         :return: boolean
         """
+        kwargs["invoiceId"] = invoice_id
+        kwargs["_ott_"] = kwargs.pop("ott", kwargs.pop("_ott_", None))
+        kwargs["wallet"] = wallet
 
-        params = kwargs
+        if kwargs["_ott_"] is None:
+            kwargs["_ott_"] = self.__common.get_ott()
 
-        params["invoiceId"] = invoice_id
-        params["_ott_"] = kwargs.pop("ott", kwargs.pop("_ott_", None))
-        params["wallet"] = wallet
-
-        if params["_ott_"] is None:
-            params["_ott_"] = self.__common.get_ott()
-
-        self._validate(params, "payAnyInvoiceByCredit")
+        self._validate(kwargs, "payAnyInvoiceByCredit")
         return self._request.call(
-            sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/payAnyInvoiceByCredit",
-                                                                     method_type="post"),
-            params=params, headers=self._get_headers(), **kwargs)
+            super(PodBilling, self)._get_sc_product_settings("/nzh/biz/payAnyInvoiceByCredit", method_type="post"),
+            params=kwargs, headers=self._get_headers(), **kwargs)
 
     def get_invoice_payment_link(self, invoice_id, redirect_url=None, call_url=None, gateway="PEP", **kwargs):
         """
@@ -487,9 +476,8 @@ class PodBilling(PodBase):
         params["invoiceId"] = invoice_id
 
         self._validate(params, "sendInvoicePaymentSMS")
-        return self._request.call(
-            sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/sendInvoicePaymentSMS"), params=params,
-            headers=self._get_headers(), **kwargs)
+        return self._request.call(super(PodBilling, self)._get_sc_product_settings("/nzh/biz/sendInvoicePaymentSMS"),
+                                  params=params, headers=self._get_headers(), **kwargs)
 
     def pay_invoice(self, invoice_id, **kwargs):
         """
@@ -505,7 +493,7 @@ class PodBilling(PodBase):
 
         self._validate(params, "payInvoice")
         return self._request.call(
-            sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/payInvoice", method_type="post"),
+            super(PodBilling, self)._get_sc_product_settings("/nzh/biz/payInvoice", method_type="post"),
             params=params, headers=self._get_headers(), **kwargs)
 
     def pay_invoice_by_invoice(self, creditor_invoice_id, debtor_invoice_id, **kwargs):
@@ -523,9 +511,8 @@ class PodBilling(PodBase):
         }
 
         self._validate(params, "payInvoiceByInvoice")
-        return self._request.call(
-            sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/payInvoiceByInvoice"), params=params,
-            headers=self._get_headers(), **kwargs)
+        return self._request.call(super(PodBilling, self)._get_sc_product_settings("/nzh/biz/payInvoiceByInvoice"),
+                                  params=params, headers=self._get_headers(), **kwargs)
 
     def pay_invoice_in_future(self, invoice_id, date, guild_code=None, wallet=None, **kwargs):
         """
@@ -537,24 +524,22 @@ class PodBilling(PodBase):
         :param str wallet: کد کیف پول
         :return: boolean
         """
-        params = kwargs
-        params["invoiceId"] = invoice_id
-        params["date"] = date
-        params["_ott_"] = kwargs.pop("ott", kwargs.pop("_ott_", None))
+        kwargs["invoiceId"] = invoice_id
+        kwargs["date"] = date
+        kwargs["_ott_"] = kwargs.pop("ott", kwargs.pop("_ott_", None))
 
-        if params["_ott_"] is None:
-            params["_ott_"] = self.__common.get_ott()
+        if kwargs["_ott_"] is None:
+            kwargs["_ott_"] = self.__common.get_ott()
 
         if guild_code is not None:
-            params["guildCode"] = guild_code
+            kwargs["guildCode"] = guild_code
 
         if wallet is not None:
-            params["wallet"] = wallet
+            kwargs["wallet"] = wallet
 
-        self._validate(params, "payInvoiceInFuture")
-        return self._request.call(
-            sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/payInvoiceInFuture"), params=params,
-            headers=self._get_headers(), **kwargs)
+        self._validate(kwargs, "payInvoiceInFuture")
+        return self._request.call(super(PodBilling, self)._get_sc_product_settings("/nzh/biz/payInvoiceInFuture"),
+                                  params=kwargs, headers=self._get_headers(), **kwargs)
 
     def pay_invoice_by_pos(self, invoice_id, terminal_number, merchant_code, reference_number, tracking_number,
                            transaction_date, wallet=None, **kwargs):
@@ -570,22 +555,19 @@ class PodBilling(PodBase):
         :param str wallet: کد کیف پول
         :return: boolean
         """
-
-        params = kwargs
-        params["invoiceId"] = invoice_id
-        params["terminalNumber"] = terminal_number
-        params["merchantCode"] = merchant_code
-        params["referenceNumber"] = reference_number
-        params["trackingNumber"] = tracking_number
-        params["transactionDate"] = transaction_date
+        kwargs["invoiceId"] = invoice_id
+        kwargs["terminalNumber"] = terminal_number
+        kwargs["merchantCode"] = merchant_code
+        kwargs["referenceNumber"] = reference_number
+        kwargs["trackingNumber"] = tracking_number
+        kwargs["transactionDate"] = transaction_date
 
         if wallet is not None:
-            params["wallet"] = wallet
+            kwargs["wallet"] = wallet
 
-        self._validate(params, "payInvoiceByPos")
-        return self._request.call(
-            sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/payInvoiceByPos"), params=params,
-            headers=self._get_headers(), **kwargs)
+        self._validate(kwargs, "payInvoiceByPos")
+        return self._request.call(super(PodBilling, self)._get_sc_product_settings("/nzh/biz/payInvoiceByPos"),
+                                  params=kwargs, headers=self._get_headers(), **kwargs)
 
     def issue_multi_invoice(self, main_invoice, customer_invoice, sub_invoices, **kwargs):
         """
@@ -607,7 +589,7 @@ class PodBilling(PodBase):
         params["data"] = json.dumps(self.__convert_dict_to_str(params["data"]))
 
         return self._request.call(
-            sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/issueMultiInvoice", method_type="post"),
+            super(PodBilling, self)._get_sc_product_settings("/nzh/biz/issueMultiInvoice", method_type="post"),
             params=params, headers=self._get_headers(), **kwargs)
 
     @staticmethod
@@ -676,5 +658,5 @@ class PodBilling(PodBase):
         params["data"] = json.dumps(self.__convert_dict_to_str(params["data"]))
 
         return self._request.call(
-            sc_product_id=super(PodBilling, self)._get_sc_product_id("/nzh/biz/" + str(service), method_type="post"),
+            super(PodBilling, self)._get_sc_product_settings("/nzh/biz/" + str(service), method_type="post"),
             params=params, headers=self._get_headers(), **kwargs)
