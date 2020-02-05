@@ -403,7 +403,7 @@ class PodBilling(PodBase):
 
         self._validate(params, "payInvoiceByCredit")
         return self._request.call(
-            super(PodBilling, self)._get_sc_product_settings("/nzh/biz/payInvoiceByCredit", method_type="post"),
+            super(PodBilling, self)._get_sc_product_settings("/nzh/payInvoiceByCredit", method_type="post"),
             params=params, headers=self._get_headers(), **kwargs)
 
     def pay_any_invoice_by_credit(self, invoice_id, wallet, **kwargs):

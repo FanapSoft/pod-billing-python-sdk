@@ -125,7 +125,7 @@
       "sandbox": 39317
     }
   },
-  "post_nzh_biz_payInvoiceByCredit": {
+  "post_nzh_payInvoiceByCredit": {
     "platform_url": "base_url",
     "sub_url": "/nzh/doServiceCall",
     "http_verb": "post",
