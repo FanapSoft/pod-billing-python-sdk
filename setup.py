@@ -24,7 +24,7 @@ setup(
     description="POD Billing services",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    keywords=["POD", "billing", "invoice", "issue invoice", "pod sdk"],
+    keywords=["POD", "billing", "invoice", "issue invoice", "settlement", "voucher", "discount", "pod sdk"],
     packages=find_packages(exclude=("tests", "examples")),
     install_requires=requires,
     zip_safe=False,
