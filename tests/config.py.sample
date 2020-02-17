@@ -15,3 +15,8 @@ OTHER_BUSINESS_API_TOKEN =   # API TOKEN کسب و کار دوم
 # Voucher Test variables
 PRODUCT_IDs = []         # لیستی از شناسه محصولات
 DEALER_BUSINESS_IDs = []    # لیستی از شناسه کسب و کارهای همکار
+
+# Settlement Test variables
+SHEBA_NUMBER = ""     # شماره شبا
+CARD_NUMBER = ""        # شماره کارت
+
