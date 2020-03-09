@@ -9,3 +9,10 @@ GUILD_CODE = "API_GUILD"  # کد صنفی که قصد دارید مبلغ فاک
 USER_ID =   # شناسه کاربری مشتری
 PRODUCT_IDs = []         # لیستی از شناسه محصولات
 DEALER_BUSINESS_IDs = []    # لیستی از شناسه کسب و کارهای همکار - حداقل 2 مورد را وارد نمایید
+
+
+# Direct WithDraw
+USERNAME_BANK = ""  # نام کاربری وب سرویس بانک
+PRIVATE_KEY_PATH = "PATH_TO_PRIVATE_KEY_XML"  # مسیر فایل xml کلید خصوصی دریافتی از بانک
+DEPOSIT_NUMBER = ""  # شماره سپرده
+
