@@ -20,3 +20,10 @@ DEALER_BUSINESS_IDs = []    # لیستی از شناسه کسب و کارهای 
 SHEBA_NUMBER = ""     # شماره شبا
 CARD_NUMBER = ""        # شماره کارت
 
+
+# Direct WithDraw Test variables
+USERNAME_BANK = ""  # نام کاربری وب سرویس بانک
+PRIVATE_KEY_PATH = ""  # مسیر فایل xml کلید خصوصی دریافتی از بانک
+DEPOSIT_NUMBER = ""  # شماره سپرده
+
+
