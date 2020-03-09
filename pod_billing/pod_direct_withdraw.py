@@ -24,8 +24,8 @@ class PodDirectWithdraw(PodBase):
         :param str deposit_number: شماره حساب مبدا در بانک پاسارگاد
         :param str wallet: کد کیف پول
         :param bool on_demand: تامین موجودی کیف پول در لحظه، در زمان کمبود موجودی
-        :param str min_amount: حداقل موجودی در کیف پول برای برداشت به اندازه `max_amount` در زمان کمبود موجودی
-        :param str max_amount: حداکثر مبلغ افزایش موجودی در زمان کمبود موجودی
+        :param int min_amount: حداقل موجودی در کیف پول برای برداشت به اندازه `max_amount` در زمان کمبود موجودی
+        :param int max_amount: حداکثر مبلغ افزایش موجودی در زمان کمبود موجودی
         :return: dict
         """
         kwargs["username"] = username
